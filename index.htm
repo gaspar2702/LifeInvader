@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LifeInvader - Intranet</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f0f0f0; margin: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        .header { background-color: #cc0000; width: 100%; padding: 20px; text-align: center; color: white; position: absolute; top: 0; font-weight: bold; font-size: 24px; }
+        .login-box { background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,0.2); text-align: center; width: 300px; }
+        input { width: 90%; padding: 10px; margin: 10px 0; border: 1px solid #ccc; border-radius: 4px; }
+        button { width: 100%; padding: 10px; background-color: #cc0000; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; }
+        button:hover { background-color: #990000; }
+        .footer-link { margin-top: 20px; font-size: 12px; color: #666; text-decoration: none; }
+    </style>
+</head>
+<body>
+    <div class="header">LifeInvader Corporativo</div>
+    
+    <div class="login-box">
+        <h2>Acceso de Empleados</h2>
+        <input type="text" id="username" placeholder="Nombre de Usuario">
+        <input type="password" id="password" placeholder="Contraseña">
+        <button onclick="checkLogin()">Ingresar</button>
+        <p id="msg" style="color: red; font-size: 14px; display: none;">Credenciales incorrectas.</p>
+    </div>
+
+    <a href="directorio.html" class="footer-link">Ver Directorio Público de Empleados</a>
+
+    <script>
+        function checkLogin() {
+            const user = document.getElementById('username').value.toLowerCase().replace(/\s/g, '');
+            const pass = document.getElementById('password').value.toLowerCase().replace(/\s/g, '');
+            
+            if(user === "trevorphilips1954" && pass === "patricia") {
+                document.body.innerHTML = "<div style='text-align:center; margin-top:20vh;'><h2>¡Acceso Concedido!</h2><p>Bienvenido al sistema central de LifeInvader.</p><div style='background:#222; color:#0f0; padding:20px; display:inline-block; font-family:monospace; font-size:24px;'>FLAG{TR3V0R_P_1NDUSTR13S}</div></div>";
+            } else {
+                document.getElementById('msg').style.display = "block";
+            }
+        }
+    </script>
+</body>
+</html>
