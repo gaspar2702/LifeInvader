@@ -25,15 +25,20 @@
         <p id="msg" style="color: red; font-size: 14px; display: none;">Credenciales incorrectas.</p>
     </div>
 
-    <a href="directorio.html" class="footer-link">Ver Directorio Público de Empleados</a>
+    <a href="directorio.htm" class="footer-link">Ver Directorio Público de Empleados</a>
 
     <script>
         function checkLogin() {
             const user = document.getElementById('username').value.toLowerCase().replace(/\s/g, '');
             const pass = document.getElementById('password').value.toLowerCase().replace(/\s/g, '');
             
-            if(user === "trevorphilips1954" && pass === "patricia") {
-                document.body.innerHTML = "<div style='text-align:center; margin-top:20vh;'><h2>¡Acceso Concedido!</h2><p>Bienvenido al sistema central de LifeInvader.</p><div style='background:#222; color:#0f0; padding:20px; display:inline-block; font-family:monospace; font-size:24px;'>FLAG{TR3V0R_P_1NDUSTR13S}</div></div>";
+            // Credenciales ofuscadas en Base64 para evitar lectura directa en GitHub
+            const uHash = btoa(user);
+            const pHash = btoa(pass);
+            
+            if(uHash === "dHJldm9ycGhpbGlwczE5NTQ=" && pHash === "cGF0cmljaWE=") {
+                const successMsg = atob("PGRpdiBzdHlsZT0ndGV4dC1hbGlnbjpjZW50ZXI7IG1hcmdpbi10b3A6MjB2aDsnPjxoMj7CoUFjY2VzbyBDb25jZWRpZG8hPC9oMj48cD5CaWVudmVuaWRvIGFsIHNpc3RlbWEgY2VudHJhbCBkZSBMaWZlSW52YWRlci48L3A+PGRpdiBzdHlsZT0nYmFja2dyb3VuZDojMjIyOyBjb2xvcjojMGYwOyBwYWRkaW5nOjIwcHg7IGRpc3BsYXk6aW5saW5lLWJsb2NrOyBmb250LWZhbWlseTptb25vc3BhY2U7IGZvbnQtc2l6ZToyNHB4Oyc+RkxBR3tUUjNWMFJfUF8xTkRVU1RSMTNTRX08L2Rpdj48L2Rpdj4=");
+                document.body.innerHTML = successMsg;
             } else {
                 document.getElementById('msg').style.display = "block";
             }
