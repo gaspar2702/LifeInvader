@@ -13,20 +13,12 @@
     </style>
 </head>
 <body>
-    <div class="content">
-        <div class="header">LifeInvader</div>
-        <h2>Trevor Philips</h2>
-        <p>CEO de Trevor Philips Enterprises. Nacido en <strong>1954</strong> en Canadá (Si me dices canadience hare que te comas tus propios huevos).</p>
+    <div class="content" id="perfil-seguro"></div>
 
-        <div class="post">
-            <div class="post-date">Publicado hace 2 días</div>
-            <p>Nadie me entiende como ella. Su esposo no la valora. Algún día volveremos a estar juntos... Oh, mi dulce y perfecta <strong>Patricia</strong>.</p>
-        </div>
-
-        <div class="post">
-            <div class="post-date">Publicado hace 1 mes</div>
-            <p>Los imbeciles de RRHH me hicieron abrir este perfil corporativo. ¿Felices ahora?</p>
-        </div>
-    </div>
+    <script>
+        // El contenido HTML está ofuscado.
+        const perfilOculto = "PGRpdiBjbGFzcz0iaGVhZGVyIj5MaWZlSW52YWRlcjwvZGl2PjxoMj5UcmV2b3IgUGhpbGlwczwvaDI+PHA+Q0VPIGRlIFRyZXZvciBQaGlsaXBzIEVudGVycHJpc2VzLiBOYWNpZG8gZW4gPHN0cm9uZz4xOTU0PC9zdHJvbmc+IGVuIENhbmFkYSAocGVybyBubyBtZSBkaWdhcyBjYW5hZGllbnNlISkuPC9wPjxkaXYgY2xhc3M9InBvc3QiPjxkaXYgY2xhc3M9InBvc3QtZGF0ZSI+UHVibGljYWRvIGhhY2UgMiBkaWFzPC9kaXY+PHA+TmFkaWUgbWUgZW50aWVuZGUgY29tbyBlbGxhLiBTdSBlc3Bvc28gbm8gbGEgdmFsb3JhLiBBbGd1biBkaWEgdm9sdmVyZW1vcyBhIGVzdGFyIGp1bnRvcy4uLiBPaCwgbWkgZHVsY2UgeSBwZXJmZWN0YSA8c3Ryb25nPlBhdHJpY2lhPC9zdHJvbmc+LjwvcD48L2Rpdj48ZGl2IGNsYXNzPSJwb3N0Ij48ZGl2IGNsYXNzPSJwb3N0LWRhdGUiPlB1YmxpY2FkbyBoYWNlIDEgbWVzPC9kaXY+PHA+TG9zIGludXRpbGVzIGRlIFJSSEggbWUgaGljaWVyb24gYWJyaXIgZXN0ZSBwZXJmaWwgY29ycG9yYXRpdm8uIEZlbGljZXMgYWhvcmE/PC9wPjwvZGl2Pg==";
+        document.getElementById('perfil-seguro').innerHTML = atob(perfilOculto);
+    </script>
 </body>
 </html>
