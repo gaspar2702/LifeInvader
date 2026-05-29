@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diapositiva 4 Rediseñada - Matriz de Riesgos Críticos</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border: #334155;
+            
+            /* Colores Matriz */
+            --matrix-crit: #ef4444;
+            --matrix-high: #f97316;
+            --matrix-mod: #eab308;
+            --matrix-low: #22c55e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', system-ui, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 40px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .slide-container {
+            width: 100%;
+            max-width: 1300px;
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 35px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border: 1px solid var(--border);
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            border-bottom: 2px solid var(--border);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        .title-area h1 {
+            font-size: 24px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            color: #f1f5f9;
+            text-transform: uppercase;
+        }
+
+        .title-area p {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+
+        .kpi-summary {
+            display: flex;
+            gap: 20px;
+        }
+
+        .kpi-box {
+            background: rgba(15, 23, 42, 0.6);
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            text-align: right;
+        }
+
+        .kpi-box span {
+            display: block;
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: 600;
+        }
+
+        .kpi-box strong {
+            font-size: 18px;
+            color: #38bdf8;
+        }
+        .kpi-box.reserve strong {
+            color: #34d399;
+        }
+
+        /* Layout en Tabla/Bloques */
+        .main-layout {
+            display: table;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 30px 0;
+        }
+
+        .column-matrix {
+            display: table-cell;
+            width: 45%;
+            vertical-align: top;
+        }
+
+        .column-details {
+            display: table-cell;
+            width: 55%;
+            vertical-align: top;
+        }
+
+        .panel-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 15px;
+            letter-spacing: 0.5px;
+        }
+
+        /* Estilos de la Matriz 5x5 */
+        .matrix-wrapper {
+            background: rgba(15, 23, 42, 0.4);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--border);
+        }
+
+        .matrix-grid {
+            display: grid;
+            grid-template-columns: 80px repeat(5, 1fr);
+            gap: 6px;
+            text-align: center;
+        }
+
+        .matrix-header-cell {
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--text-muted);
+            padding: 8px 0;
+            align-self: center;
+        }
+
+        .matrix-row-label {
+            font-size: 11px;
+            font-weight: bold;
+            color: var(--text-muted);
+            text-align: right;
+            padding-right: 10px;
+            align-self: center;
+        }
+
+        .matrix-cell {
+            aspect-ratio: 1;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: rgba(255,255,255,0.9);
+            position: relative;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .matrix-cell:hover {
+            transform: scale(1.04);
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+            z-index: 10;
+        }
+
+        /* Colores dinámicos de severidad */
+        .c-low { background-color: rgba(34, 197, 94, 0.25); border: 1px solid rgba(34, 197, 94, 0.5); color: #4ade80; }
+        .c-mod { background-color: rgba(234, 179, 8, 0.25); border: 1px solid rgba(234, 179, 8, 0.5); color: #fde047; }
+        .c-high { background-color: rgba(249, 115, 22, 0.3); border: 1px solid rgba(249, 115, 22, 0.6); color: #ffedd5; }
+        .c-crit { background-color: rgba(239, 68, 68, 0.4); border: 1px solid rgba(239, 68, 68, 0.8); color: #fee2e2; }
+
+        /* Tokens dentro de la matriz */
+        .risk-tokens {
+            display: flex;
+            gap: 4px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .token {
+            background: #ffffff;
+            color: #0f172a;
+            font-size: 10px;
+            padding: 2px 5px;
+            border-radius: 4px;
+            font-weight: 800;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        /* Panel de Detalle Activo */
+        .details-wrapper {
+            background: rgba(15, 23, 42, 0.3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 25px;
+            min-height: 380px;
+        }
+
+        .risk-list-selector {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .selector-btn {
+            background: #334155;
+            color: var(--text-main);
+            border: none;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .selector-btn:hover {
+            background: #475569;
+        }
+
+        .selector-btn.active {
+            background: #38bdf8;
+            color: #0f172a;
+            box-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+        }
+
+        .detail-card {
+            display: none;
+        }
+
+        .detail-card.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .detail-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .detail-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #f1f5f9;
+        }
+
+        .detail-score {
+            background: #ef4444;
+            color: white;
+            font-size: 13px;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        .info-block {
+            background: rgba(15, 23, 42, 0.5);
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .info-block h4 {
+            font-size: 11px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .info-block p {
+            font-size: 13.5px;
+            color: #cbd5e1;
+            line-height: 1.5;
+        }
+
+        .action-block {
+            background: linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(15, 23, 42, 0.5));
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            padding: 18px;
+            border-radius: 8px;
+        }
+
+        .action-block h4 {
+            font-size: 11px;
+            color: #38bdf8;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .action-block p {
+            font-size: 14px;
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+
+        .cost-tag {
+            margin-top: 15px;
+            text-align: right;
+            font-size: 14px;
+            color: var(--text-muted);
+        }
+
+        .cost-tag strong {
+            color: #f43f5e;
+            font-size: 16px;
+        }
+
+        .axis-title-x {
+            grid-column: span 6;
+            text-align: center;
+            font-size: 12px;
+            font-weight: bold;
+            color: var(--text-muted);
+            margin-top: 5px;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="slide-container">
+        <header>
+            <div class="title-area">
+                <h1>Riesgos Cualitativos Críticos — Mapa de Calor</h1>
+                <p>Monitoreo prioritario de los 7 riesgos con Severidad Crítica (P×I ≥ 15)</p>
+            </div>
+            <div class="kpi-summary">
+                <div class="kpi-box">
+                    <span>Costo Mitigación Total</span>
+                    <strong>$29.800.000</strong>
+                </div>
+                <div class="kpi-box reserve">
+                    <span>Reserva Contingencia</span>
+                    <strong>$2.700.000</strong>
+                </div>
+            </div>
+        </header>
+
+        <div class="main-layout">
+            <!-- COLUMNA IZQUIERDA: MATRIZ DE CALOR -->
+            <div class="column-matrix">
+                <div class="panel-title">Distribución Espacial de Riesgos (Matriz 5x5)</div>
+                <div class="matrix-wrapper">
+                    <div class="matrix-grid">
+                        
+                        <!-- Fila 5 -->
+                        <div class="matrix-row-label">5 (Casi Seguro)</div>
+                        <div class="matrix-cell c-mod" onclick="selectRisk('R4')">15</div>
+                        <div class="matrix-cell c-high">10</div>
+                        <div class="matrix-cell c-high">15</div>
+                        <div class="matrix-cell c-crit">20</div>
+                        <div class="matrix-cell c-crit">25</div>
+
+                        <!-- Fila 4 -->
+                        <div class="matrix-row-label">4 (Probable)</div>
+                        <div class="matrix-cell c-mod">4</div>
+                        <div class="matrix-cell c-mod">8</div>
+                        <div class="matrix-cell c-high">12</div>
+                        <div class="matrix-cell c-crit" onclick="selectRisk('R6')">
+                            16
+                            <div class="risk-tokens"><span class="token">R6</span><span class="token">R8</span></div>
+                        </div>
+                        <div class="matrix-cell c-crit" onclick="selectRisk('R1')">
+                            20
+                            <div class="risk-tokens"><span class="token">R1</span><span class="token">R2</span><span class="token">R3</span></div>
+                        </div>
+
+                        <!-- Fila 3 -->
+                        <div class="matrix-row-label">3 (Posible)</div>
+                        <div class="matrix-cell c-low">3</div>
+                        <div class="matrix-cell c-mod">6</div>
+                        <div class="matrix-cell c-mod">9</div>
+                        <div class="matrix-cell c-high">12</div>
+                        <div class="matrix-cell c-crit" onclick="selectRisk('R4')">
+                            15
+                            <div class="risk-tokens"><span class="token">R4</span><span class="token">R5</span></div>
+                        </div>
+
+                        <!-- Fila 2 -->
+                        <div class="matrix-row-label">2 (Improbable)</div>
+                        <div class="matrix-cell c-low">2</div>
+                        <div class="matrix-cell c-low">4</div>
+                        <div class="matrix-cell c-mod">6</div>
+                        <div class="matrix-cell c-high">8</div>
+                        <div class="matrix-cell c-high">10</div>
+
+                        <!-- Fila 1 -->
+                        <div class="matrix-row-label">1 (Raro)</div>
+                        <div class="matrix-cell c-low">1</div>
+                        <div class="matrix-cell c-low">2</div>
+                        <div class="matrix-cell c-low">3</div>
+                        <div class="matrix-cell c-mod">4</div>
+                        <div class="matrix-cell c-mod">5</div>
+
+                        <!-- Etiquetas Inferiores Eje X -->
+                        <div></div>
+                        <div class="matrix-header-cell">1<br>Insig.</div>
+                        <div class="matrix-header-cell">2<br>Menor</div>
+                        <div class="matrix-header-cell">3<br>Mod.</div>
+                        <div class="matrix-header-cell">4<br>Mayor</div>
+                        <div class="matrix-header-cell">5<br>Catástr.</div>
+
+                        <!-- Título Eje X -->
+                        <div></div>
+                        <div class="axis-title-x">Impacto Operacional →</div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- COLUMNA DERECHA: DETALLES DE RIESGOS -->
+            <div class="column-details">
+                <div class="panel-title">Ficha Técnica de Mitigación Avanzada</div>
+                <div class="details-wrapper">
+                    
+                    <!-- Selectores Rápidos -->
+                    <div class="risk-list-selector">
+                        <button class="selector-btn active" id="btn-R1" onclick="selectRisk('R1')">R1: Red 5G</button>
+                        <button class="selector-btn" id="btn-R2" onclick="selectRisk('R2')">R2: Latencia</button>
+                        <button class="selector-btn" id="btn-R3" onclick="selectRisk('R3')">R3: Sensores</button>
+                        <button class="selector-btn" id="btn-R4" onclick="selectRisk('R4')">R4: Algoritmos</button>
+                        <button class="selector-btn" id="btn-R5" onclick="selectRisk('R5')">R5: Ciberseguridad</button>
+                        <button class="selector-btn" id="btn-R6" onclick="selectRisk('R6')">R6: Clima Extremo</button>
+                        <button class="selector-btn" id="btn-R8" onclick="selectRisk('R8')">R8: Sindicatos</button>
+                    </div>
+
+                    <!-- CARD R1 -->
+                    <div class="detail-card active" id="card-R1">
+                        <div class="detail-header">
+                            <div class="detail-title">Fallas Red Privada 5G/LTE</div>
+                            <div class="detail-score">P×I = 20 (Crítico)</div>
+                        </div>
+                        <div class="info-grid">
+                            <div class="info-block">
+                                <h4>Causa Principal</h4>
+                                <p>Zonas de sombra topográfica debido a la geometría dinámica del rajo abierto a 3.500 msnm.</p>
+                            </div>
+                            <div class="info-block">
+                                <h4>Impacto Operacional</h4>
+                                <p>Pérdida imprevista del control en tiempo real, generando potencial colisión de camiones autónomos.</p>
+                            </div>
+                        </div>
+                        <div class="action-block">
+                            <h4>Acción de Respuesta (Estrategia)</h4>
+                            <p>Implementación de infraestructura de redundancia triple simultánea: Red 5G industrial Nokia + Anillo de Fibra Óptica + Enlace Satelital de baja órbita.</p>
+                        </div>
+                        <div class="cost-tag">Presupuesto Asignado: <strong>$4.500.000</strong></div>
+                    </div>
+
+                    <!-- CARD R2 -->
+                    <div class="detail-card" id="card-R2">
+                        <div class="detail-header">
+                            <div class="detail-title">Latencia de Red > 20ms</div>
+                            <div class="detail-score">P×I = 20 (Crítico)</div>
+                        </div>
+                        <div class="info-grid">
+                            <div class="info-block">
+                                <h4>Causa Principal</h4>
+                                <p>Saturación de los nodos de red centralizados debido al tráfico masivo sin procesamiento distribuido local.</p>
+                            </div>
+                            <div class="info-block">
+                                <h4>Impacto Operacional</h4>
+                                <p>Gatillado de sistemas fail-safe automáticos con detención inmediata de toda la flota CAEX (pérdida total de producción).</p>
+                            </div>
+                        </div>
+                        <div class="action-block">
+                            <h4>Acción de Respuesta (Estrategia)</h4>
+                            <p>Despliegue de Servidores Edge Computing directo en la faena minera y configuración estricta de políticas QoS para control crítico.</p>
+                        </div>
+                        <div class="cost-tag">Presupuesto Asignado: <strong>$3.200.000</strong></div>
+                    </div>
+
+                    <!-- CARD R3 -->
+                    <div class="detail-card" id="card-R3">
+                        <div class="detail-header">
+                            <div class="detail-title">Fallas en Sensores LiDAR/Radar</div>
+                            <div class="detail-score">P×I = 20 (Crítico)</div>
+                        </div>
+                        <div class="info-grid">
+                            <div class="info-block">
+                                <h4>Causa Principal</h4>
+                                <p>Polvo extremo en suspensión, ventiscas de nieve persistentes y temperaturas operacionales bajo los -20°C.</p>
+                            </div>
+                            <div class="info-block">
+                                <h4>Impacto Operacional</h4>
+                                <p>Pérdida de la visibilidad y telemetría local de la máquina ("autonomía ciega"), provocando accidentes catastróficos.</p>
+                            </div>
+                        </div>
+                        <div class="action-block">
+                            <h4>Acción de Respuesta (Estrategia)</h4>
+                            <p>Instalación de sensores industriales con certificación IP67 o superior equipados con sistemas autónomos de autolimpieza por aire a presión.</p>
+                        </div>
+                        <div class="cost-tag">Presupuesto Asignado: <strong>$5.800.000</strong></div>
+                    </div>
+
+                    <!-- CARD R4 -->
+                    <div class="detail-card" id="card-R4">
+                        <div class="detail-header">
+                            <div class="detail-title">Errores en Algoritmos de Autonomía</div>
+                            <div class="detail-score">P×I = 15 (Crítico)</div>
+                        </div>
+                        <div class="info-grid">
+                            <div class="info-block">
+                                <h4>Causa Principal</h4>
+                                <p>Presencia de falsos negativos en curvas ciegas o aparición de condiciones geográficas imprevistas en los modelos analíticos.</p>
+                            </div>
+                            <div class="info-block">
+                                <h4>Impacto Operacional</h4>
+                                <p>Colisión directa de camión de alto valor ($7M+) con la infraestructura y paralización absoluta de la faena minera.</p>
+                            </div>
+                        </div>
+                        <div class="action-block">
+                            <h4>Acción de Respuesta (Estrategia)</h4>
+                            <p>Ejecución obligatoria de una marcha blanca controlada de 6 meses operando en paralelo con simulaciones avanzadas en entorno virtualizado.</p>
+                        </div>
+                        <div class="cost-tag">Presupuesto Asignado: <strong>$2.800.000</strong></div>
+                    </div>
+
+                    <!-- CARD R5 -->
+                    <div class="detail-card" id="card-R5">
+                        <div class="detail-header">
+                            <div class="detail-title">Ciberseguridad OT/IT e Infiltraciones</div>
+                            <div class="detail-score">P×I = 15 (Crítico)</div>
+                        </div>
+                        <div class="info-grid">
+                            <div class="info-block">
+                                <h4>Causa Principal</h4>
+                                <p>Accesos remotos habilitados desde la central IROC en Santiago sin políticas restrictivas Zero Trust ni segmentación adecuada.</p>
+                            </div>
+                            <div class="info-block">
+                                <h4>Impacto Operacional</h4>
+                                <p>Secuestro, manipulación del firmware o sabotaje malicioso coordinado sobre camiones autónomos en movimiento ($12M expuestos).</p>
+                            </div>
+                        </div>
+                        <div class="action-block">
+                            <h4>Acción de Respuesta (Estrategia)</h4>
+                            <p>Arquitectura Zero Trust estricta, despliegue de Firewalls industriales de Capa 7, autenticación MFA y aislamiento de redes OT de las corporativas IT.</p>
+                        </div>
+                        <div class="cost-tag">Presupuesto Asignado: <strong>$3.500.000</strong></div>
+                    </div>
+
+                    <!-- CARD R6 -->
+                    <div class="detail-card" id="card-R6">
+                        <div class="detail-header">
+                            <div class="detail-title">Condiciones Climáticas de Alta Montaña</div>
+                            <div class="detail-score">P×I = 16 (Crítico)</div>
+                        </div>
+                        <div class="info-grid">
+                            <div class="info-block">
+                                <h4>Causa Principal</h4>
+                                <p>Fenómenos severos de vientos blancos, tormentas eléctricas de nieve y congelamiento térmico prolongado (-20°C).</p>
+                            </div>
+                            <div class="info-block">
+                                <h4>Impacto Operacional</h4>
+                                <p>Destrucción física prematura del hardware de red en terreno y detención forzada de la operación minera de alta cordillera.</p>
+                            </div>
+                        </div>
+                        <div class="action-block">
+                            <h4>Acción de Respuesta (Estrategia)</h4>
+                            <p>Uso exclusivo de hardware con certificación militar y montaje en racks climatizados avanzados con calefacción controlada por sensores.</p>
+                        </div>
+                        <div class="cost-tag">Presupuesto Asignado: <strong>$2.200.000</strong></div>
+                    </div>
+
+                    <!-- CARD R8 -->
+                    <div class="detail-card" id="card-R8">
+                        <div class="detail-header">
+                            <div class="detail-title">Resistencia Sindical al Cambio</div>
+                            <div class="detail-score">P×I = 16 (Crítico)</div>
+                        </div>
+                        <div class="info-grid">
+                            <div class="info-block">
+                                <h4>Causa Principal</h4>
+                                <p>Temor justificado a despidos y desvinculaciones debido al proceso de centralización de la operación en el IROC de Santiago.</p>
+                            </div>
+                            <div class="info-block">
+                                <h4>Impacto Operacional</h4>
+                                <p>Huelgas generales y paralizaciones de faena con un sobrecosto medio estimado de $6.155.925 según análisis de Monte Carlo.</p>
+                            </div>
+                        </div>
+                        <div class="action-block">
+                            <h4>Acción de Respuesta (Estrategia)</h4>
+                            <p>Establecimiento inmediato de mesas de trabajo conjuntas, planes masivos de reconversión laboral técnica y talleres de adopción cultural activa.</p>
+                        </div>
+                        <div class="cost-tag">Presupuesto Asignado: <strong>$3.000.000</strong></div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function selectRisk(riskId) {
+            // Remover clases activas de los selectores
+            document.querySelectorAll('.selector-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            // Ocultar todas las tarjetas de detalle
+            document.querySelectorAll('.detail-card').forEach(card => {
+                card.classList.remove('active');
+            });
+
+            // Activar botón y tarjeta correspondiente
+            const activeBtn = document.getElementById('btn-' + riskId);
+            const activeCard = document.getElementById('card-' + riskId);
+            
+            if(activeBtn) activeBtn.classList.add('active');
+            if(activeCard) activeCard.classList.add('active');
+        }
+    </script>
+</body>
+</html>

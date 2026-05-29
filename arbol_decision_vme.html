@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador de Árbol de Decisión y VME - Proyecto CAEX</title>
+    <style>
+        :root {
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-main: #2c3e50;
+            --text-muted: #7f8c8d;
+            --primary: #34495e;
+            --accent-success: #27ae60;
+            --accent-danger: #c0392b;
+            --border-color: #dcdde1;
+            --highlight: #f1c40f;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            padding: 30px;
+            line-height: 1.6;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            background: linear-gradient(135deg, #1e272e, #3d3d3d);
+            padding: 30px;
+            border-radius: 12px;
+            color: #ffffff;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+            letter-spacing: 0.5px;
+        }
+
+        header p {
+            color: #bdc3c7;
+            font-size: 14px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .grid-section {
+            display: block;
+            margin-bottom: 40px;
+        }
+
+        .risk-card {
+            background: var(--card-bg);
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+            border: 1px solid var(--border-color);
+        }
+
+        .risk-header {
+            border-bottom: 2px solid var(--bg-color);
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+            display: table;
+            width: 100%;
+        }
+
+        .risk-title {
+            display: table-cell;
+            font-size: 18px;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        .risk-meta {
+            display: table-cell;
+            text-align: right;
+            font-size: 13px;
+            color: var(--text-muted);
+            vertical-align: middle;
+        }
+
+        .controls-panel {
+            background: var(--bg-color);
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 25px;
+        }
+
+        .slider-group {
+            margin-bottom: 10px;
+        }
+
+        .slider-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .slider-container {
+            display: table;
+            width: 100%;
+        }
+
+        .slider-cell-input {
+            display: table-cell;
+            width: 85%;
+            vertical-align: middle;
+        }
+
+        .slider-cell-val {
+            display: table-cell;
+            width: 15%;
+            text-align: right;
+            font-weight: bold;
+            color: var(--accent-danger);
+            vertical-align: middle;
+            font-size: 14px;
+        }
+
+        input[type=range] {
+            width: 100%;
+            height: 6px;
+            background: #bdbdbd;
+            border-radius: 3px;
+            outline: none;
+        }
+
+        .tree-layout {
+            display: table;
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 20px 0;
+        }
+
+        .tree-branch {
+            display: table-cell;
+            width: 50%;
+            background: #fafafa;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            position: relative;
+            vertical-align: top;
+            transition: all 0.3s ease;
+        }
+
+        .tree-branch.selected {
+            border-color: var(--accent-success);
+            background: #f0fff4;
+            box-shadow: 0 4px 12px rgba(46, 204, 113, 0.15);
+        }
+
+        .tree-branch.selected::top {
+            content: '✔ RECOMENDADO';
+            position: absolute;
+            top: -12px;
+            left: 15px;
+            background: var(--accent-success);
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .badge-winner {
+            display: inline-block;
+            background: var(--accent-success);
+            color: white;
+            font-size: 11px;
+            font-weight: bold;
+            padding: 2px 8px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            visibility: hidden;
+        }
+
+        .tree-branch.selected .badge-winner {
+            visibility: visible;
+        }
+
+        .branch-title {
+            font-size: 16px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .branch-cost {
+            font-size: 13px;
+            color: var(--text-muted);
+            margin-bottom: 15px;
+        }
+
+        .node-outputs {
+            border-top: 1px dashed var(--border-color);
+            padding-top: 12px;
+        }
+
+        .output-row {
+            display: table;
+            width: 100%;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .output-label {
+            display: table-cell;
+            width: 60%;
+        }
+
+        .output-val {
+            display: table-cell;
+            width: 40%;
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .vme-total-box {
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 2px solid var(--border-color);
+            display: table;
+            width: 100%;
+        }
+
+        .vme-label {
+            display: table-cell;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .vme-value {
+            display: table-cell;
+            text-align: right;
+            font-weight: bold;
+            font-size: 16px;
+            color: var(--primary);
+        }
+
+        .tree-branch.selected .vme-value {
+            color: var(--accent-success);
+        }
+
+        .summary-banner {
+            background: #e8f4fd;
+            border-left: 5px solid #3498db;
+            padding: 15px;
+            border-radius: 0 8px 8px 0;
+            margin-top: 20px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .summary-banner span {
+            color: #2980b9;
+            font-size: 16px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>PROYECTO CAEX AUTÓNOMO & RED 5G - MINA LOS BRONCES</h1>
+            <p>Análisis de Árbol de Decisión y Valor Monetario Esperado (VME) Dinámico</p>
+        </header>
+
+        <div class="grid-section">
+
+            <!-- RIESGO R3 -->
+            <div class="risk-card">
+                <div class="risk-header">
+                    <div class="risk-title">R3: Selección de Sensores de Autonomía</div>
+                    <div class="risk-meta">Optimización de Infraestructura contra Clima y Polvo</div>
+                </div>
+
+                <div class="controls-panel">
+                    <div class="slider-group">
+                        <label for="p-r3">Probabilidad de Falla en LiDAR IP67+ (Por condiciones climáticas extremas):</label>
+                        <div class="slider-container">
+                            <div class="slider-cell-input">
+                                <input type="range" id="p-r3" min="0" max="100" value="50" oninput="updateR3()">
+                            </div>
+                            <div class="slider-cell-val"><span id="p-r3-val">50</span>%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tree-layout">
+                    <!-- OPCION A -->
+                    <div class="tree-branch" id="branch-r3-a">
+                        <span class="badge-winner">✓ RECOMENDADA (MENOR COSTO ESPERADO)</span>
+                        <div class="branch-title">Opción A: LiDAR IP67+</div>
+                        <div class="branch-cost">Costo Base Inicial: $3.800.000</div>
+                        
+                        <div class="node-outputs">
+                            <div class="output-row">
+                                <div class="output-label">Éxito (Operación normal):</div>
+                                <div class="output-val"><span id="p-r3-exito">50</span>% × $0</div>
+                            </div>
+                            <div class="output-row">
+                                <div class="output-label">Falla (Costo impacto/reparación):</div>
+                                <div class="output-val"><span id="p-r3-falla">50</span>% × $4.200.000</div>
+                            </div>
+                        </div>
+
+                        <div class="vme-total-box">
+                            <div class="vme-label">VME Total:</div>
+                            <div class="vme-value" id="vme-r3-a">$5.900.000</div>
+                        </div>
+                    </div>
+
+                    <!-- OPCION B -->
+                    <div class="tree-branch" id="branch-r3-b">
+                        <span class="badge-winner">✓ RECOMENDADA (MENOR COSTO ESPERADO)</span>
+                        <div class="branch-title">Opción B: Ecosistema Full Redundante</div>
+                        <div class="branch-cost">Costo Fijo Integrado: $5.800.000</div>
+                        
+                        <div class="node-outputs">
+                            <div class="output-row">
+                                <div class="output-label">Rendimiento Asegurado:</div>
+                                <div class="output-val">100% Garantizado</div>
+                            </div>
+                            <div class="output-row">
+                                <div class="output-label">Riesgo remanente mínimo:</div>
+                                <div class="output-val">$180.000 (VME Fijo)</div>
+                            </div>
+                        </div>
+
+                        <div class="vme-total-box">
+                            <div class="vme-label">VME Total:</div>
+                            <div class="vme-value" id="vme-r3-b">$5.980.000</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-banner" id="banner-r3">
+                    Decisión óptima: Opción A genera un ahorro de VME de <span>$80.000</span> frente a la opción B.
+                </div>
+            </div>
+
+
+            <!-- RIESGO R4 -->
+            <div class="risk-card">
+                <div class="risk-header">
+                    <div class="risk-title">R4: Estrategia de Despliegue de Algoritmos Fail-Safe</div>
+                    <div class="risk-meta">Mitigación de Incidentes en Curvas Ciegas</div>
+                </div>
+
+                <div class="controls-panel">
+                    <div class="slider-group">
+                        <label for="p-r4">Probabilidad de Incidente Crítico (Sin Marcha Blanca previa):</label>
+                        <div class="slider-container">
+                            <div class="slider-cell-input">
+                                <input type="range" id="p-r4" min="0" max="100" value="20" oninput="updateR4()">
+                            </div>
+                            <div class="slider-cell-val"><span id="p-r4-val">20</span>%</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tree-layout">
+                    <!-- MARCHA BLANCA -->
+                    <div class="tree-branch" id="branch-r4-a">
+                        <span class="badge-winner">✓ RECOMENDADA (MENOR COSTO ESPERADO)</span>
+                        <div class="branch-title">Estrategia 1: Marcha Blanca (6 Meses)</div>
+                        <div class="branch-cost">Costo Controlado: $1.500.000</div>
+                        
+                        <div class="node-outputs">
+                            <div class="output-row">
+                                <div class="output-label">Éxito en simulación controlada:</div>
+                                <div class="output-val"><span id="p-r4-exito">80</span>% × $0</div>
+                            </div>
+                            <div class="output-row">
+                                <div class="output-label">Incidente residual mitigado:</div>
+                                <div class="output-val"><span id="p-r4-falla">20</span>% × $3.200.000</div>
+                            </div>
+                        </div>
+
+                        <div class="vme-total-box">
+                            <div class="vme-label">VME Total:</div>
+                            <div class="vme-value" id="vme-r4-a">$2.140.000</div>
+                        </div>
+                    </div>
+
+                    <!-- DESPLIEGUE DIRECTO -->
+                    <div class="tree-branch" id="branch-r4-b">
+                        <span class="badge-winner">✓ RECOMENDADA (MENOR COSTO ESPERADO)</span>
+                        <div class="branch-title">Estrategia 2: Despliegue Directo</div>
+                        <div class="branch-cost">Costo Inicial: $0</div>
+                        
+                        <div class="node-outputs">
+                            <div class="output-row">
+                                <div class="output-label">Impacto Operacional Directo:</div>
+                                <div class="output-val">Ponderado Histórico / Riesgo Máximo</div>
+                            </div>
+                            <div class="output-row">
+                                <div class="output-label">Pérdida faena por colisión:</div>
+                                <div class="output-val">100% de Exposición</div>
+                            </div>
+                        </div>
+
+                        <div class="vme-total-box">
+                            <div class="vme-label">VME Total:</div>
+                            <div class="vme-value" id="vme-r4-b">$5.340.000</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="summary-banner" id="banner-r4">
+                    Decisión óptima: La Marcha Blanca previene pérdidas masivas, ahorrando <span>$3.200.000</span> en VME.
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        function formatCurrency(num) {
+            return '$' + num.toFixed(0).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function updateR3() {
+            const pFalla = parseFloat(document.getElementById('p-r3').value) / 100;
+            const pExito = 1 - pFalla;
+            
+            document.getElementById('p-r3-val').innerText = (pFalla * 100).toFixed(0);
+            document.getElementById('p-r3-exito').innerText = (pExito * 100).toFixed(0);
+            document.getElementById('p-r3-falla').innerText = (pFalla * 100).toFixed(0);
+
+            // Calcular VME Opción A
+            const vmeA = 3800000 + (pFalla * 4200000);
+            const vmeB = 5980000; // Valor fijo base presentación
+
+            document.getElementById('vme-r3-a').innerText = formatCurrency(vmeA);
+
+            const branchA = document.getElementById('branch-r3-a');
+            const branchB = document.getElementById('branch-r3-b');
+            const banner = document.getElementById('banner-r3');
+
+            if (vmeA <= vmeB) {
+                branchA.classList.add('selected');
+                branchB.classList.remove('selected');
+                banner.innerHTML = `Decisión óptima: <strong>Opción A (LiDAR IP67+)</strong> es la mejor alternativa, con un ahorro en VME de <span>${formatCurrency(vmeB - vmeA)}</span> frente a la Opción B.`;
+            } else {
+                branchA.classList.remove('selected');
+                branchB.classList.add('selected');
+                banner.innerHTML = `Decisión óptima: Debido al aumento del riesgo climático, el <strong>Ecosistema Full (Opción B)</strong> se vuelve la opción económicamente óptima, ahorrando <span>${formatCurrency(vmeA - vmeB)}</span> en VME.`;
+            }
+        }
+
+        function updateR4() {
+            const pIncidente = parseFloat(document.getElementById('p-r4').value) / 100;
+            const pExito = 1 - pIncidente;
+
+            document.getElementById('p-r4-val').innerText = (pIncidente * 100).toFixed(0);
+            document.getElementById('p-r4-exito').innerText = (pExito * 100).toFixed(0);
+            document.getElementById('p-r4-falla').innerText = (pIncidente * 100).toFixed(0);
+
+            // Calcular VME Marcha Blanca
+            const vmeMB = 1500000 + (pIncidente * 3200000);
+            const vmeDirecto = 5340000; // Base presentación
+
+            document.getElementById('vme-r4-a').innerText = formatCurrency(vmeMB);
+
+            const branchA = document.getElementById('branch-r4-a');
+            const branchB = document.getElementById('branch-r4-b');
+            const banner = document.getElementById('banner-r4');
+
+            if (vmeMB <= vmeDirecto) {
+                branchA.classList.add('selected');
+                branchB.classList.remove('selected');
+                banner.innerHTML = `Decisión óptima: <strong>Hacer Marcha Blanca</strong> es la estrategia correcta, protegiendo los activos con un ahorro de <span>${formatCurrency(vmeDirecto - vmeMB)}</span> en VME.`;
+            } else {
+                branchA.classList.remove('selected');
+                branchB.classList.add('selected');
+                banner.innerHTML = `Decisión óptima: El <strong>Despliegue Directo</strong> es preferible únicamente si la probabilidad de incidentes cae a niveles mínimos, ahorrando <span>${formatCurrency(vmeMB - vmeDirecto)}</span>.`;
+            }
+        }
+
+        // Inicializar
+        updateR3();
+        updateR4();
+    </script>
+</body>
+</html>
